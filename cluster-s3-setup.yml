@@ -1,0 +1,33 @@
+---
+- name: Create S3 bucket and Kubernetes cluster
+  hosts: [g1]
+  become: yes
+  gather_facts: False
+  vars:
+    bucket_name: "final-proj-buck"
+    cluster_name: "dera"
+    cluster_zones: "us-east-1a,us-east-1b"
+    node_count: 2
+    node_size: "t2.medium"
+    master_size: "t2.micro"
+    k8s_version: "1.27.0"
+    region: 'us-east-1'
+
+  tasks:
+    - name: Create S3 bucket
+      shell: >
+        {% if region == 'us-east-1' %}
+        aws s3api create-bucket --bucket {{ bucket_name }} --region {{ region }}
+        {% else %}
+        aws s3api create-bucket --bucket {{ bucket_name }} --region {{ region }} --create-bucket-configuration LocationConstraint={{ region }}
+        {% endif %}
+
+    - name: Create Kubernetes cluster
+      shell: >
+        kops create cluster --zones {{ cluster_zones }} --node-count {{ node_count }} --node-size {{ node_size }}
+        --master-size {{ master_size }} --kubernetes-version {{ k8s_version }} --name {{ cluster_name }}.k8s.local
+        --yes
+      environment:
+        KOPS_STATE_STORE: "s3://{{ bucket_name }}"
+...
+

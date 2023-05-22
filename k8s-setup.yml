@@ -1,0 +1,69 @@
+---
+- name: Install AWS CLI v2 and Kubernetes components on Ubuntu
+  hosts: [g1]
+  become: yes
+  tasks:
+    - name: Update apt cache
+      apt: 
+        update_cache: yes
+
+    - name: Install general necessary packages
+      apt:
+        name: ['curl', 'unzip', 'apt-transport-https', 'ca-certificates', 'software-properties-common', 'dnsutils', 'wget']
+        state: latest
+
+    - name: Ensure python3-pip is installed
+      apt:
+        name: python3-pip
+        state: present
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker APT repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: latest
+
+    - name: Download AWS CLI v2
+      get_url:
+        url: "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+        dest: "/tmp/awscliv2.zip"
+
+    - name: Unzip AWS CLI v2
+      unarchive:
+        src: "/tmp/awscliv2.zip"
+        dest: "/tmp/"
+        remote_src: yes
+
+    - name: Install AWS CLI v2
+      command: 
+        cmd: ./aws/install -i /usr/local/aws-cli -b /usr/local/bin
+        chdir: /tmp/
+        creates: /usr/local/bin/aws
+
+    - name: Fetch latest Kops version
+      shell: "curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep tag_name | cut -d '\"' -f 4"
+      register: kops_version
+      changed_when: False
+
+    - name: Download Kops
+      get_url:
+        url: "https://github.com/kubernetes/kops/releases/download/{{ kops_version.stdout }}/kops-linux-amd64"
+        dest: /usr/local/bin/kops
+        mode: '0755'
+
+    - name: Download Kubectl
+      get_url:
+        url: https://storage.googleapis.com/kubernetes-release/release/v1.23.0/bin/linux/amd64/kubectl
+        dest: /usr/local/bin/kubectl
+        mode: '0755'
+...
+

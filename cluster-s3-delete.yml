@@ -1,0 +1,23 @@
+---
+- name: Delete Kubernetes cluster and S3 bucket
+  hosts: [g1]
+  become: yes
+  gather_facts: False
+  vars:
+    bucket_name: "final-proj-buck"
+    cluster_name: "dera"
+
+  tasks:
+  - name: Delete Kubernetes cluster
+    shell: >
+      kops delete cluster --name {{ cluster_name }}.k8s.local --yes
+    environment:
+      KOPS_STATE_STORE: "s3://{{ bucket_name }}"
+
+  # - name: Empty S3 bucket
+  #   shell: "aws s3 rm s3://{{ bucket_name }} --recursive"
+
+  # - name: Delete S3 bucket
+  #   shell: "aws s3api delete-bucket --bucket {{ bucket_name }} --region us-east-1"
+
+
