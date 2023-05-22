@@ -27,7 +27,7 @@ pipeline {
         stage('Push Docker image to Docker Hub') {
             steps{
                 script {
-                    docker.withRegistry( '', 'derao/webappcal' ) {
+                    docker.withRegistry( '', 'docker' ) {
                         dockerImage.push("${env.BUILD_NUMBER}")
                     }
                 }
