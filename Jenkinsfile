@@ -3,8 +3,8 @@ pipeline {
     environment {
         registry = "derao/webappcal"
         dockerImage = ''
-        DEPLOYMENT_NAME = 'webappcal' 
-        NAMESPACE = 'dev' 
+        DEPLOYMENT_NAME = 'webappcal'
+        NAMESPACE = 'dev'
     }
     stages {
         stage('Build Docker image') {
@@ -16,7 +16,7 @@ pipeline {
         }
 
         stage('Login to Docker Hub') {
-            steps{
+            steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
                         sh "echo $DOCKER_HUB_PASSWORD | docker login --username $DOCKER_HUB_USERNAME --password-stdin"
@@ -26,9 +26,9 @@ pipeline {
         }
 
         stage('Push Docker image to Docker Hub') {
-            steps{
+            steps {
                 script {
-                    docker.withRegistry( '', 'docker' ) {
+                    docker.withRegistry('', 'docker') {
                         dockerImage.push("${env.BUILD_NUMBER}")
                     }
                 }
