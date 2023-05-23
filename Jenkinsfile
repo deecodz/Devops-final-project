@@ -18,7 +18,7 @@ pipeline {
         stage('Login to Docker Hub') {
             steps{
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'dockerCredentials', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
+                    withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
                         sh "echo $DOCKER_HUB_PASSWORD | docker login --username $DOCKER_HUB_USERNAME --password-stdin"
                     }
                 }
@@ -28,7 +28,7 @@ pipeline {
         stage('Push Docker image to Docker Hub') {
             steps{
                 script {
-                    docker.withRegistry( '', 'dockerCredentials' ) {
+                    docker.withRegistry( '', 'docker' ) {
                         dockerImage.push("${env.BUILD_NUMBER}")
                     }
                 }
