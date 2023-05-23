@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
     environment {
@@ -40,15 +39,17 @@ pipeline {
             steps {
                 script {
                     withCredentials([kubeconfig(credentialsId: 'k8s', variable: 'KUBECONFIG')]) {
-                        // Copy the kubeconfig file to the Jenkins workspace
-                        sh "cp $KUBECONFIG .kube/config"
+                        kubeconfig(credentialsId: 'my-kubeconfig') {
+                            // Copy the kubeconfig file to the Jenkins workspace
+                            sh "cp $KUBECONFIG .kube/config"
 
-                        // Use the kubeconfig file for Kubernetes operations
-                        withKubeConfig(path: '.kube/config') {
-                            sh("""
-                                kubectl apply -f k8s-depl-manifest.yml
-                                kubectl rollout status deployment/${DEPLOYMENT_NAME} -n ${NAMESPACE}
-                            """)
+                            // Use the kubeconfig file for Kubernetes operations
+                            withKubeConfig(path: '.kube/config') {
+                                sh("""
+                                    kubectl apply -f k8s-depl-manifest.yml
+                                    kubectl rollout status deployment/${DEPLOYMENT_NAME} -n ${NAMESPACE}
+                                """)
+                            }
                         }
                     }
                 }
