@@ -38,7 +38,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    withCredentials([kubeconfig(credentialsId: 'k8s', variable: 'KUBECONFIG')]) {
+                    kubeconfig(credentialsId: 'k8s') {
                         sh("""
                             kubectl apply -f k8s-depl-manifest.yml
                             kubectl rollout status deployment/${DEPLOYMENT_NAME} -n ${NAMESPACE}
@@ -51,7 +51,7 @@ pipeline {
         stage('Get Service DNS') {
             steps {
                 script {
-                    withCredentials([kubeconfig(credentialsId: 'k8s', variable: 'KUBECONFIG')]) {
+                    kubeconfig(credentialsId: 'k8s') {
                         def dns = sh(script: "kubectl get svc ${DEPLOYMENT_NAME} -n ${NAMESPACE} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'", returnStdout: true).trim()
                         echo "Service DNS: ${dns}"
                     }
