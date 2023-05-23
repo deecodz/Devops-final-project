@@ -38,11 +38,11 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 withCredentials([string(credentialsId: 'k8s', variable: 'KUBECONFIG')]) {
-                    sh """
-                        echo "$KUBECONFIG" > kubeconfig.yaml
+                    sh '''
+                        echo "$KUBECONFIG" | base64 -d > kubeconfig.yaml
                         kubectl apply -f kubeconfig.yaml
                         kubectl rollout status deployment/${DEPLOYMENT_NAME} -n ${NAMESPACE}
-                    """
+                    '''
                 }
             }
         }
