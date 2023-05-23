@@ -1,5 +1,3 @@
-
-
 pipeline {
     agent any
     environment {
@@ -48,8 +46,6 @@ pipeline {
                 }
             }
         }
-    }
-}
 
         stage('Get Service DNS') {
             steps {
@@ -63,4 +59,3 @@ pipeline {
         }
     }
 }
-
