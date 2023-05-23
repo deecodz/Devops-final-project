@@ -50,7 +50,7 @@ stage('Deploy to Kubernetes') {
         stage('Get Service DNS') {
             steps {
                 script {
-                    withCredentials([kubeconfig(credentialsId: 'k8s', variable: 'KUBECONFIG')]) {
+                    withCredentials([file(credentialsId: 'k8s', variable: 'KUBECONFIG')]) {
                         def dns = sh(script: "kubectl get svc ${DEPLOYMENT_NAME} -n ${NAMESPACE} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'", returnStdout: true).trim()
                         echo "Service DNS: ${dns}"
                     }
