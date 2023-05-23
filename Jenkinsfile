@@ -38,18 +38,16 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    withCredentials([kubeconfig(credentialsId: 'k8s', variable: 'KUBECONFIG')]) {
-                        kubeconfig(credentialsId: 'my-kubeconfig') {
-                            // Copy the kubeconfig file to the Jenkins workspace
-                            sh "cp $KUBECONFIG .kube/config"
+                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                        // Copy the kubeconfig file to the Jenkins workspace
+                        sh "cp $KUBECONFIG .kube/config"
 
-                            // Use the kubeconfig file for Kubernetes operations
-                            withKubeConfig(path: '.kube/config') {
-                                sh("""
-                                    kubectl apply -f k8s-depl-manifest.yml
-                                    kubectl rollout status deployment/${DEPLOYMENT_NAME} -n ${NAMESPACE}
-                                """)
-                            }
+                        // Use the kubeconfig file for Kubernetes operations
+                        withKubeConfig(path: '.kube/config') {
+                            sh("""
+                                kubectl apply -f k8s-depl-manifest.yml
+                                kubectl rollout status deployment/${DEPLOYMENT_NAME} -n ${NAMESPACE}
+                            """)
                         }
                     }
                 }
@@ -59,7 +57,7 @@ pipeline {
         stage('Get Service DNS') {
             steps {
                 script {
-                    withCredentials([kubeconfig(credentialsId: 'k8s', variable: 'KUBECONFIG')]) {
+                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                         def dns = sh(script: "kubectl get svc ${DEPLOYMENT_NAME} -n ${NAMESPACE} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'", returnStdout: true).trim()
                         echo "Service DNS: ${dns}"
                     }
